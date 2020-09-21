@@ -18,12 +18,10 @@ class BrandModel(db.Model):
     updated = db.Column(db.DateTime, onupdate=datetime.utcnow(), nullable=True)
 
 
-
     def insert_record(self) -> None:
         db.session.add(self)
         db.session.commit()
         
-
     @classmethod
     def fetch_all(cls) -> List['BrandModel']:
         return cls.query.order_by(cls.id.asc()).all()
@@ -41,10 +39,19 @@ class BrandModel(db.Model):
         return cls.query.filter_by(name=name).first()
 
     @classmethod  
-    def update(cls, id, name:str=None) -> None:
+    def update(cls, id, name:str=None, category_id:int=None) -> None:
         record = cls.fetch_by_id(id)
         if name:
             record.name = name
+        if category_id:
+            record.category_id = category_id
+        db.session.commit()
+
+    @classmethod  
+    def update_logo(cls, id, logo:str=None) -> None:
+        record = cls.fetch_by_id(id)
+        if logo:
+            record.logo = logo
         db.session.commit()
 
     @classmethod

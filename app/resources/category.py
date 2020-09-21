@@ -4,6 +4,8 @@ from flask_jwt_extended import jwt_required, get_jwt_claims, get_jwt_identity
 
 from models.category import CategoryModel
 from schemas.category import CategorySchema
+from user_functions.record_user_log import record_user_log
+
 
 api = Namespace('category', description='Category Management')
 
@@ -26,9 +28,9 @@ class CategoryList(Resource):
     @api.expect(category_model)
     # @jwt_required
     def post(cls):
-        # claims = get_jwt_claims()
-        # if not claims['is_admin']:
-        #     return {'message': 'You are not authorised to use this resource'}, 403
+        claims = get_jwt_claims()
+        if not claims['is_admin']:
+            return {'message': 'You are not authorised to use this resource'}, 403
         try:
             data = api.payload
             if not data:
@@ -45,12 +47,18 @@ class CategoryList(Resource):
             category = CategoryModel(name=name)
             category.insert_record()
 
+            # Record this event in user's logs
+            log_method = 'post'
+            log_description = f'Added category <{name}>'
+            authorization = request.headers.get('Authorization')
+            auth_token  = {"Authorization": authorization}
+            record_user_log(auth_token, log_method, log_description)
             return {'category':name}, 201
         except Exception as e:
             print('========================================')
             print('Error description: ', e)
             print('========================================')
-            return{'message':'Could not save category.'}, 500
+            return{'message':'Could not save category to database.'}, 500
 
 
 @api.route('/<int:id>')
@@ -67,9 +75,9 @@ class CategoryDetail(Resource):
     # @jwt_required
     @api.expect(category_model)
     def put(self, id:int):
-        # claims = get_jwt_claims()
-        # if not claims['is_admin']:
-        #     return {'message': 'You are not authorised to use this resource'}, 403
+        claims = get_jwt_claims()
+        if not claims['is_admin']:
+            return {'message': 'You are not authorised to use this resource.'}, 403
         try:
             data = api.payload
             if not data:
@@ -86,30 +94,44 @@ class CategoryDetail(Resource):
                 if category_by_name:
                     if category_by_name.id != id:
                         return {'message':'This category already exists in another record.'}, 400
-                updated_category = CategoryModel.update(id, name=name) 
-                return category_schema.dump(category) # Perform future checks
+                CategoryModel.update(id, name=name) 
+
+                # Record this event in user's logs
+                log_method = 'put'
+                log_description = f'Updated category <{id}>'
+                authorization = request.headers.get('Authorization')
+                auth_token  = {"Authorization": authorization}
+                record_user_log(auth_token, log_method, log_description)
+                return category_schema.dump(category), 200 # Perform future checks
             return {'message': 'This category does not exist.'}, 404
         except Exception as e:
             print('========================================')
             print('Error description: ', e)
             print('========================================')
-            return{'message':'Could not save category.'}, 500
+            return{'message':'Could not save category to database.'}, 500
 
     @classmethod
     # @jwt_required
     def delete(cls, id:int):
-        # claims = get_jwt_claims()
-        # if not claims['is_admin']:
-        #     return {'message': 'You are not authorised to use this resource'}, 403
+        claims = get_jwt_claims()
+        if not claims['is_admin']:
+            return {'message': 'You are not authorised to use this resource'}, 403
         try:
             category = CategoryModel.fetch_by_id(id)
             if category:
                 CategoryModel.delete_by_id(id)
+
+                # Record this event in user's logs
+                log_method = 'delete'
+                log_description = f'Deleted category <{id}>'
+                authorization = request.headers.get('Authorization')
+                auth_token  = {"Authorization": authorization}
+                record_user_log(auth_token, log_method, log_description)
                 return {'message':f'Deleted category <{id}>'}, 200
             return {'message':'This record does not exist'}, 404
         except Exception as e:
             print('========================================')
             print('Error description: ', e)
             print('========================================')
-            return{'message':'Could not save category.'}, 500
+            return{'message':'Could not delete category.'}, 500
 
