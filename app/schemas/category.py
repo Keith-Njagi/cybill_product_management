@@ -4,7 +4,7 @@ from models.brand import BrandModel
 from .brand import BrandSchema
 
 class CategorySchema(ma.SQLAlchemyAutoSchema):
-    providers = ma.Nested(BrandSchema, many=True)
+    brands = ma.Nested(BrandSchema, many=True)
     class Meta:
         model = CategoryModel
         dump_only = ('id', 'created', 'updated',)

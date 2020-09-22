@@ -10,6 +10,7 @@ class ItemModel(db.Model):
     brand_id = db.Column(db.Integer, db.ForeignKey('brands.id'))
     brand = db.relationship('BrandModel')
 
+
     name = db.Column(db.String(50), unique=True, nullable=False)
     description = db.Column(db.String(50), unique=True, nullable=False)
     price = db.Column (db.Float(precision=2), nullable=False)
@@ -18,6 +19,7 @@ class ItemModel(db.Model):
     created = db.Column(db.DateTime, default=datetime.utcnow(), nullable=False)
     updated = db.Column(db.DateTime, onupdate=datetime.utcnow(), nullable=True)
 
+    images = db.relationship('ImageModel')
 
     def insert_record(self) -> None:
         db.session.add(self)

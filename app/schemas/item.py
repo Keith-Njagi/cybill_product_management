@@ -2,8 +2,10 @@ from . import ma
 
 from models.item import ItemModel
 from models.brand import BrandModel
+from schemas.image import Imagechema
 
 class ItemSchema(ma.SQLAlchemyAutoSchema):
+    images = ma.Nested(Imagechema, many=True)
     class Meta:
         model = ItemModel
         load_only = ('brand',)

@@ -15,5 +15,6 @@ class BrandSchema(ma.SQLAlchemyAutoSchema):
 
     _links = ma.Hyperlinks({
         'self': ma.URLFor('BrandDetail', id='<id>'),
+        'logo': ma.URLFor('LogoDetail', id='<id>'),
         'collection': ma.URLFor('BrandList')
     })

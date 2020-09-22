@@ -4,6 +4,8 @@ from flask_jwt_extended import JWTManager
 
 from blacklist import BLACKLIST
 from .category import api as category
+from .brand import api as brand
+from .item import api as item
 
 
 jwt = JWTManager()
@@ -21,6 +23,8 @@ blueprint = Blueprint('api', __name__, url_prefix='/api')
 api = Api(blueprint, doc='/documentation', title='Product management API', version='0.1', description='An API to manage product entry', authorizations=authorizations, security='apikey')
 
 api.add_namespace(category)
+api.add_namespace(brand)
+api.add_namespace(item)
 
 @jwt.user_claims_loader
 # Remember identity is what we define when creating the access token
