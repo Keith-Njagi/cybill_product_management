@@ -2,6 +2,9 @@
 from flask_restx import Namespace, Resource, fields
 from flask import request
 from flask_jwt_extended import jwt_required, get_jwt_claims, get_jwt_identity
+from werkzeug.utils import secure_filename
+from werkzeug.datastructures import FileStorage
+
 
 from models.brand import BrandModel
 from models.category import CategoryModel
@@ -12,8 +15,8 @@ from user_functions.validate_logo import allowed_file
 api = Namespace('brand', description='Brand Management')
 
 brand_model = api.model('Brand', {
-    'name': fields.String(required=True, ),
-    'category_id': fields.Integer(required=True,)
+    'name': fields.String(required=True, description='Name',),
+    'category_id': fields.Integer(required=True, description='Category ID',)
 })
 
 upload_parser = api.parser()
@@ -31,10 +34,16 @@ brands_schema = BrandSchema(many=True)
 class BrandList(Resource):
     @classmethod
     def get (cls):
-        brands = BrandModel.fetch_all()
-        if brands:
-            return brands_schema.dump(brands), 200
-        return {'message':'There are no brands created yet.'}, 404
+        try:
+            brands = BrandModel.fetch_all()
+            if brands:
+                return brands_schema.dump(brands), 200
+            return {'message':'There are no brands created yet.'}, 404
+        except Exception as e:
+            print('========================================')
+            print('Error description: ', e)
+            print('========================================')
+            return{'message':'Could not fetch brands.'}, 500
 
     @classmethod
     @jwt_required
@@ -91,10 +100,16 @@ class BrandList(Resource):
 class BrandDetail(Resource):
     @classmethod
     def get(cls, id:int):
-        brand = BrandModel.fetch_by_id(id)
-        if brand:
-            return brand_schema.dump(brand), 200
-        return {'message':'This brand does not exist.'}, 404
+        try:
+            brand = BrandModel.fetch_by_id(id)
+            if brand:
+                return brand_schema.dump(brand), 200
+            return {'message':'This brand does not exist.'}, 404
+        except Exception as e:
+            print('========================================')
+            print('Error description: ', e)
+            print('========================================')
+            return{'message':'Could not fetch brand.'}, 500
 
     @classmethod
     @jwt_required
@@ -162,7 +177,7 @@ class BrandDetail(Resource):
             print('========================================')
             print('Error description: ', e)
             print('========================================')
-            return{'message':'Could not delete category.'}, 500
+            return{'message':'Could not delete brand.'}, 500
 
 
 

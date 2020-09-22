@@ -19,10 +19,16 @@ categories_schema = CategorySchema(many=True)
 class CategoryList(Resource):
     @classmethod
     def get (cls):
-        categories = CategoryModel.fetch_all()
-        if categories:
-            return categories_schema.dump(categories), 200
-        return {'message':'There are no categories created yet.'}, 404
+        try:
+            categories = CategoryModel.fetch_all()
+            if categories:
+                return categories_schema.dump(categories), 200
+            return {'message':'There are no categories created yet.'}, 404
+        except Exception as e:
+            print('========================================')
+            print('Error description: ', e)
+            print('========================================')
+            return{'message':'Could not fetch categories.'}, 500
 
     @classmethod
     @api.expect(category_model)
@@ -66,10 +72,16 @@ class CategoryList(Resource):
 class CategoryDetail(Resource):
     @classmethod
     def get (cls, id:int):
-        category = CategoryModel.fetch_by_id(id)
-        if category:
-            return category_schema.dump(category), 200
-        return {'message':'This category does not exist.'}, 404
+        try:
+            category = CategoryModel.fetch_by_id(id)
+            if category:
+                return category_schema.dump(category), 200
+            return {'message':'This category does not exist.'}, 404
+        except Exception as e:
+            print('========================================')
+            print('Error description: ', e)
+            print('========================================')
+            return{'message':'Could not fetch category.'}, 500
 
     @classmethod
     # @jwt_required
